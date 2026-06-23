@@ -1,4 +1,4 @@
-# SURGIR — Portal Fuerza de Ventas (Web)
+# Surgir — Portal Fuerza de Ventas (Web)
 
 Portal web en **React + Vite** para asesores de **Financiera SURGIR**.
 Conectado a **Supabase** — la misma base de datos que la app Flutter (`Aplicacion banco 2`).

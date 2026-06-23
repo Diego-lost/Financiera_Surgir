@@ -1,9 +1,9 @@
 {
-  "name": "surgir-fuerza-ventas-front",
+  "name": "surgir",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Financiera SURGIR — Portal web Fuerza de Ventas (asesores). Consume Core Mobile FastAPI.",
+  "description": "Financiera SURGIR — Portal web Fuerza de Ventas (asesores). React + Vite + Supabase.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

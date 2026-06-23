@@ -1,6 +1,6 @@
 import { supabase, supabaseError } from '../lib/supabase.js'
 
-/** Pre-evaluación local (misma lógica referencial que el backend Andino). */
+/** Pre-evaluación local (misma lógica referencial que el portal SURGIR). */
 export async function preEvaluar(payload) {
   const ingresos = Number(payload.ingresos_estimados) || 0
   const monto = Number(payload.monto_solicitado) || 0
