@@ -15,8 +15,8 @@ export async function obtenerFicha(clienteId) {
   const { data: creditos } = await supabase
     .from('creditos_preaprobados')
     .select(
-      'id, segmento, tipo_producto, monto_aprobado, cuota_mensual, plazo_meses, '
-      + 'estado, estado_pago, dias_mora, tea, created_at',
+      'id, segmento, tipo_producto, monto_aprobado, saldo_pendiente, cuotas_pagadas, '
+      + 'cuota_mensual, plazo_meses, estado, estado_pago, dias_mora, tea, created_at',
     )
     .eq('user_id', clienteId)
     .order('created_at', { ascending: false })
@@ -24,9 +24,14 @@ export async function obtenerFicha(clienteId) {
   const buroRaw = await fetchConsultaBuro(clienteId).catch(() => null)
 
   const lista = creditos || []
+  const activos = lista.filter((c) => c.estado === 'desembolsado')
+  const deudaActiva = activos.reduce(
+    (sum, c) => sum + Number(c.saldo_pendiente ?? c.monto_aprobado ?? 0),
+    0,
+  )
   const enMora = lista.filter((c) => (c.dias_mora || 0) > 0)
   const maxMora = lista.reduce((m, c) => Math.max(m, c.dias_mora || 0), 0)
-  const vigente = lista.find((c) => c.estado === 'vigente' || c.estado === 'aprobado') || lista[0]
+  const vigente = activos[0] || lista.find((c) => c.estado === 'vigente' || c.estado === 'aprobado') || lista[0]
 
   const buro = buroRaw?.ok ? buroRaw : null
 
@@ -43,7 +48,9 @@ export async function obtenerFicha(clienteId) {
       antiguedad_negocio_meses: perfil.antiguedad_negocio_meses,
     },
     posicion: {
-      deuda_total: perfil.deuda_total_sbs || buro?.sbs?.deuda_total || 0,
+      deuda_total: deudaActiva > 0
+        ? deudaActiva
+        : (perfil.deuda_total_sbs || buro?.sbs?.deuda_total || 0),
       cuentas_vigentes: lista.filter((c) => (c.dias_mora || 0) === 0).length,
       cuentas_mora: enMora.length,
       dias_mayor_mora: maxMora,
@@ -51,16 +58,17 @@ export async function obtenerFicha(clienteId) {
     historial: lista.map((c) => ({
       producto: c.tipo_producto || c.segmento || 'Crédito',
       monto_desembolsado: c.monto_aprobado,
+      saldo_pendiente: c.saldo_pendiente ?? c.monto_aprobado,
       plazo_meses: c.plazo_meses,
       tea: c.tea || 60,
-      cuotas_pagadas: 0,
+      cuotas_pagadas: c.cuotas_pagadas ?? 0,
       cuotas_total: c.plazo_meses,
       dias_mora: c.dias_mora || 0,
       estado: c.estado_pago || c.estado || 'vigente',
     })),
     oferta: vigente
       ? {
-          monto_maximo: vigente.monto_aprobado,
+          monto_maximo: vigente.saldo_pendiente ?? vigente.monto_aprobado,
           plazo_sugerido_meses: vigente.plazo_meses,
           tea_referencial: vigente.tea || 60,
           score_confianza: buro?.scoring?.transaccional ?? null,

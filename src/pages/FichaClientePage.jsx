@@ -159,6 +159,7 @@ export default function FichaClientePage() {
                 <tr>
                   <th>Producto</th>
                   <th className="num">Desembolsado</th>
+                  <th className="num">Saldo pendiente</th>
                   <th className="num">Plazo</th>
                   <th className="num">TEA</th>
                   <th className="num">Cuotas</th>
@@ -171,6 +172,7 @@ export default function FichaClientePage() {
                   <tr key={i}>
                     <td>{humanizar(h.producto) || 'Crédito'}</td>
                     <td className="num"><Money value={h.monto_desembolsado} /></td>
+                    <td className="num"><Money value={h.saldo_pendiente} /></td>
                     <td className="num">{h.plazo_meses ?? '—'} m</td>
                     <td className="num">{formatPct(h.tea)}</td>
                     <td className="num">{h.cuotas_pagadas}/{h.cuotas_total}</td>
