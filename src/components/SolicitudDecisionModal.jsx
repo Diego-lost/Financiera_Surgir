@@ -7,8 +7,8 @@ import { responderSolicitud } from '../services/fventasService.js'
 import { extractError } from '../utils/format.js'
 
 const DECISIONES = [
-  { id: 'aprobar', label: 'Aprobar', desc: 'Desembolsa y abona a la cuenta del cliente' },
-  { id: 'aprobar_monto_reducido', label: 'Aprobar monto reducido', desc: 'Aprueba un monto menor' },
+  { id: 'aprobar', label: 'Aprobar', desc: 'Aprueba la solicitud; el desembolso se hace en Transmisión' },
+  { id: 'aprobar_monto_reducido', label: 'Aprobar monto reducido', desc: 'Aprueba un monto menor; desembolso en Transmisión' },
   { id: 'elevar_comite', label: 'Elevar a comité', desc: 'Requiere revisión del comité' },
   { id: 'rechazar', label: 'Rechazar', desc: 'No procede la solicitud' },
 ]

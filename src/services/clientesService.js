@@ -1,4 +1,5 @@
 import { supabase, supabaseError } from '../lib/supabase.js'
+import { fetchConsultaBuro } from './supabaseHelpers.js'
 
 /** Ficha 360° del cliente desde perfiles + créditos + buró (Supabase). */
 export async function obtenerFicha(clienteId) {
@@ -20,9 +21,7 @@ export async function obtenerFicha(clienteId) {
     .eq('user_id', clienteId)
     .order('created_at', { ascending: false })
 
-  const { data: buroRaw } = await supabase.rpc('asesor_consulta_buro', {
-    p_user_id: clienteId,
-  })
+  const buroRaw = await fetchConsultaBuro(clienteId).catch(() => null)
 
   const lista = creditos || []
   const enMora = lista.filter((c) => (c.dias_mora || 0) > 0)

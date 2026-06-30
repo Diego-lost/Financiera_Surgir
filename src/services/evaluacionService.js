@@ -1,4 +1,5 @@
 import { supabase, supabaseError } from '../lib/supabase.js'
+import { fetchConsultaBuro } from './supabaseHelpers.js'
 
 /** Pre-evaluación local (misma lógica referencial que el portal SURGIR). */
 export async function preEvaluar(payload) {
@@ -31,11 +32,11 @@ export async function preEvaluar(payload) {
   return { calificacion, puntaje, motivo, ratio_cuota: ratio }
 }
 
-/** Consulta buró vía RPC asesor_consulta_buro. */
+/** Consulta buró desde perfiles_clientes + scores + fichas (Supabase). */
 export async function consultarBuro({ dni }) {
   const { data: cliente, error: cliErr } = await supabase
     .from('perfiles_clientes')
-    .select('user_id, calificacion_sbs, num_entidades_sbs, deuda_total_sbs')
+    .select('user_id')
     .eq('dni', dni.trim())
     .maybeSingle()
 
@@ -44,14 +45,10 @@ export async function consultarBuro({ dni }) {
     throw new Error('Cliente no encontrado en tu cartera. Verifica el DNI.')
   }
 
-  const { data: raw, error } = await supabase.rpc('asesor_consulta_buro', {
-    p_user_id: cliente.user_id,
-  })
-
-  if (error) throw new Error(supabaseError(error))
+  const raw = await fetchConsultaBuro(cliente.user_id)
   if (!raw?.ok) throw new Error(raw?.error || 'No se pudo consultar el buró.')
 
-  const cal = raw.sbs?.calificacion || cliente.calificacion_sbs || 'Normal'
+  const cal = raw.sbs?.calificacion || 'Normal'
   const bloqueados = ['Dudoso', 'Perdida', 'Deficiente']
   const enLista = bloqueados.includes(cal)
 
@@ -68,10 +65,10 @@ export async function consultarBuro({ dni }) {
     motivo_bloqueo: enLista ? `Calificación SBS: ${cal}. No procede automáticamente.` : null,
     calificacion_sbs: cal,
     interpretacion: interpretaciones[cal] || 'Consulta realizada.',
-    entidades_con_deuda: raw.sbs?.entidades ?? cliente.num_entidades_sbs ?? 0,
-    deuda_total: raw.sbs?.deuda_total ?? cliente.deuda_total_sbs ?? 0,
-    mayor_deuda: raw.sbs?.deuda_total ?? cliente.deuda_total_sbs ?? 0,
-    dias_mayor_mora: 0,
+    entidades_con_deuda: raw.sbs?.entidades ?? 0,
+    deuda_total: raw.sbs?.deuda_total ?? 0,
+    mayor_deuda: raw.sbs?.deuda_total ?? 0,
+    dias_mayor_mora: raw.dias_mayor_mora ?? 0,
     scoring: raw.scoring,
   }
 }

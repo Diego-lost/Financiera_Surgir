@@ -24,6 +24,43 @@ export async function transmitirPendientes() {
   return data
 }
 
+export async function desembolsarSolicitudes(solicitudIds) {
+  const { data, error } = await supabase.rpc('asesor_desembolsar_solicitudes', {
+    p_solicitud_ids: solicitudIds,
+  })
+  if (error) throw new Error(supabaseError(error))
+  if (!data?.ok) throw new Error(data?.error || 'No se pudo desembolsar.')
+  return data
+}
+
+export async function listarDocumentosPendientes() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('documentos_captura')
+    .select('id, tipo, referencia, user_id')
+    .eq('estado', 'capturado')
+    .eq('asesor_user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(supabaseError(error))
+
+  const rows = data || []
+  const { fetchPerfilesMap } = await import('./supabaseHelpers.js')
+  const perfilesMap = await fetchPerfilesMap(rows.map((r) => r.user_id))
+
+  return rows.map((row) => {
+    const pc = perfilesMap[row.user_id] || {}
+    return {
+      id: row.id,
+      tipo: row.tipo,
+      referencia: row.referencia,
+      cliente_nombre: `${pc.nombres ?? ''} ${pc.apellidos ?? ''}`.trim() || 'Cliente',
+    }
+  })
+}
+
 export async function atenderSolicitudCliente(solicitudId) {
   const { data, error } = await supabase.rpc('asesor_atender_solicitud_cliente', {
     p_solicitud_id: solicitudId,

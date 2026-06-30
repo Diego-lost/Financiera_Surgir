@@ -12,19 +12,30 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let alive = true
 
-    authService.restoreSession().then((session) => {
-      if (!alive) return
-      if (session) {
-        authService.saveSession(session.token, session.user)
-        setToken(session.token)
-        setUser(session.user)
-      } else {
+    authService.restoreSession()
+      .then((session) => {
+        if (!alive) return
+        if (session) {
+          authService.saveSession(session.token, session.user)
+          setToken(session.token)
+          setUser(session.user)
+        } else {
+          authService.clearSession()
+          setToken(null)
+          setUser(null)
+        }
+      })
+      .catch(() => {
+        if (!alive) return
         authService.clearSession()
         setToken(null)
         setUser(null)
-      }
-      setBooting(false)
-    })
+      })
+      .finally(() => {
+        if (alive) setBooting(false)
+      })
+
+    if (!supabase) return undefined
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!alive) return

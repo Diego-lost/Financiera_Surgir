@@ -147,7 +147,9 @@ export default function SolicitudesPage() {
             setOkMsg(
               res.desembolsado
                 ? `Solicitud desembolsada. El cliente verá S/ ${Number(res.monto).toFixed(2)} en su cuenta.`
-                : 'Decisión registrada correctamente.',
+                : res.estado === 'aprobado'
+                  ? 'Solicitud aprobada. Desembolsa desde Transmisión cuando corresponda.'
+                  : 'Decisión registrada correctamente.',
             )
             cargar()
           }}

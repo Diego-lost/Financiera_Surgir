@@ -65,3 +65,30 @@ Ejecutar `database/supabase/30_cobranza_completa.sql` para:
 VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
 VITE_SUPABASE_ANON_KEY=tu_anon_key
 ```
+
+## Despliegue en Vercel
+
+Portal en producción: **https://financiera-surgir.vercel.app**
+
+### Variables obligatorias (Settings → Environment Variables)
+
+Sin estas variables el build de Vite **no incluye** la conexión a Supabase y la página queda en blanco.
+
+| Variable | Ejemplo |
+|----------|---------|
+| `VITE_SUPABASE_URL` | `https://xxx.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | `eyJ...` (anon key del proyecto) |
+
+Marca **Production**, **Preview** y **Development**. Después de guardar, haz **Redeploy** (no basta con guardar las variables).
+
+Copia los mismos valores que en `.env` local o en la app Flutter.
+
+### Build
+
+| Configuración | Valor |
+|---------------|-------|
+| Framework | Vite |
+| Build | `npm run build` |
+| Output | `dist` |
+
+`vercel.json` redirige rutas SPA (`/login`, `/inicio`, etc.) a `index.html`.
