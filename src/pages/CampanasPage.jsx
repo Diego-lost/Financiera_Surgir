@@ -10,7 +10,7 @@ import { extractError } from '../utils/format.js'
 
 function mapCampana(row) {
   const pc = row.perfiles_clientes || {}
-  const monto = Number(row.monto_aprobado) || 0
+  const monto = Number(row.saldo_pendiente ?? row.monto_aprobado) || 0
   const segmento = String(row.segmento || '').toUpperCase()
   const tipo = monto >= 8000 || segmento.includes('PLUS') ? 'ampliacion' : 'renovacion'
   const nombre = `${pc.nombres ?? ''} ${pc.apellidos ?? ''}`.trim() || 'Cliente'

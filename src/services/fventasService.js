@@ -1,4 +1,5 @@
 import { supabase, supabaseError } from '../lib/supabase.js'
+import { fetchPerfilesMap } from './supabaseHelpers.js'
 
 export async function responderSolicitud({
   solicitudId,
@@ -149,13 +150,20 @@ export async function listarCampanas() {
   const { data, error } = await supabase
     .from('creditos_preaprobados')
     .select(
-      'id, user_id, monto_aprobado, segmento, estado_pago, dias_mora, '
-      + 'perfiles_clientes(nombres, apellidos, dni)',
+      'id, user_id, monto_aprobado, saldo_pendiente, segmento, estado_pago, dias_mora, estado',
     )
     .eq('dias_mora', 0)
+    .eq('estado', 'desembolsado')
     .order('monto_aprobado', { ascending: false })
     .limit(40)
 
   if (error) throw new Error(supabaseError(error))
-  return (data || []).filter((r) => r.estado_pago === 'al_dia')
+
+  const rows = (data || []).filter((r) => r.estado_pago === 'al_dia')
+  const perfilesMap = await fetchPerfilesMap(rows.map((r) => r.user_id))
+
+  return rows.map((row) => ({
+    ...row,
+    perfiles_clientes: perfilesMap[row.user_id] || null,
+  }))
 }

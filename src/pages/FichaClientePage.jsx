@@ -43,7 +43,7 @@ export default function FichaClientePage() {
   if (error) return <Alert tipo="error">{error}</Alert>
   if (!ficha) return null
 
-  const { cliente, posicion, historial = [], oferta, indicadores } = ficha
+  const { cliente, posicion, historial = [], oferta, indicadores, cuentas = [] } = ficha
   const nombre = `${cliente.nombres} ${cliente.apellidos}`.trim()
 
   const irNuevaSolicitud = () => {
@@ -101,20 +101,20 @@ export default function FichaClientePage() {
           <div className="cm-kpis" style={{ marginBottom: 0, gridTemplateColumns: '1fr 1fr' }}>
             <div className="cm-kpi" style={{ borderLeftColor: '#e2132b' }}>
               <div>
-                <div className="cm-kpi-label">Deuda total</div>
+                <div className="cm-kpi-label">Deuda pendiente</div>
                 <span className="cm-kpi-val" style={{ fontSize: 20 }}><Money value={posicion?.deuda_total} /></span>
+              </div>
+            </div>
+            <div className="cm-kpi" style={{ borderLeftColor: '#2563eb' }}>
+              <div>
+                <div className="cm-kpi-label">Saldo en cuentas</div>
+                <span className="cm-kpi-val" style={{ fontSize: 20 }}><Money value={posicion?.saldo_cuentas} /></span>
               </div>
             </div>
             <div className="cm-kpi" style={{ borderLeftColor: '#00a9a5' }}>
               <div>
-                <div className="cm-kpi-label">Cuentas vigentes</div>
+                <div className="cm-kpi-label">Créditos al día</div>
                 <span className="cm-kpi-val">{posicion?.cuentas_vigentes ?? 0}</span>
-              </div>
-            </div>
-            <div className="cm-kpi" style={{ borderLeftColor: '#f7941e' }}>
-              <div>
-                <div className="cm-kpi-label">Cuentas en mora</div>
-                <span className="cm-kpi-val">{posicion?.cuentas_mora ?? 0}</span>
               </div>
             </div>
             <div className="cm-kpi" style={{ borderLeftColor: '#8e24aa' }}>
@@ -126,6 +126,31 @@ export default function FichaClientePage() {
           </div>
         </Card>
       </div>
+
+      {cuentas.length > 0 && (
+        <Card title="Cuentas del cliente" icon={Wallet} style={{ marginTop: 16 }}>
+          <div className="hb-table-wrap">
+            <table className="hb-table">
+              <thead>
+                <tr>
+                  <th>Cuenta</th>
+                  <th>Tipo</th>
+                  <th className="num">Saldo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cuentas.map((c) => (
+                  <tr key={c.id}>
+                    <td>{c.numero_cuenta}</td>
+                    <td>{humanizar(c.tipo)}</td>
+                    <td className="num"><Money value={c.saldo} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
 
       {oferta && (
         <Card title="Oferta pre-aprobada" icon={Gift} style={{ marginTop: 16, borderColor: '#bfe3c8', background: '#f6fbf7' }}>

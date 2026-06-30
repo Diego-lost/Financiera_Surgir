@@ -21,9 +21,17 @@ export async function obtenerFicha(clienteId) {
     .eq('user_id', clienteId)
     .order('created_at', { ascending: false })
 
+  const { data: cuentas } = await supabase
+    .from('cuentas')
+    .select('id, tipo, numero_cuenta, saldo, moneda')
+    .eq('user_id', clienteId)
+    .order('created_at')
+
   const buroRaw = await fetchConsultaBuro(clienteId).catch(() => null)
 
   const lista = creditos || []
+  const listaCuentas = cuentas || []
+  const saldoCuentas = listaCuentas.reduce((s, c) => s + Number(c.saldo || 0), 0)
   const activos = lista.filter((c) => c.estado === 'desembolsado')
   const deudaActiva = activos.reduce(
     (sum, c) => sum + Number(c.saldo_pendiente ?? c.monto_aprobado ?? 0),
@@ -51,10 +59,18 @@ export async function obtenerFicha(clienteId) {
       deuda_total: deudaActiva > 0
         ? deudaActiva
         : (perfil.deuda_total_sbs || buro?.sbs?.deuda_total || 0),
+      saldo_cuentas: saldoCuentas,
       cuentas_vigentes: lista.filter((c) => (c.dias_mora || 0) === 0).length,
       cuentas_mora: enMora.length,
       dias_mayor_mora: maxMora,
     },
+    cuentas: listaCuentas.map((c) => ({
+      id: c.id,
+      tipo: c.tipo,
+      numero_cuenta: c.numero_cuenta,
+      saldo: Number(c.saldo) || 0,
+      moneda: c.moneda || 'PEN',
+    })),
     historial: lista.map((c) => ({
       producto: c.tipo_producto || c.segmento || 'Crédito',
       monto_desembolsado: c.monto_aprobado,
