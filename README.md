@@ -64,10 +64,7 @@ Ejecutar `database/supabase/30_cobranza_completa.sql` para:
 ```
 VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
 VITE_SUPABASE_ANON_KEY=tu_anon_key
-VITE_GOOGLE_MAPS_API_KEY=tu_google_maps_api_key
 ```
-
-Misma `GOOGLE_MAPS_API_KEY` que en `Aplicacion banco 2/.env` (Geocoding + Places para **Nuevo cliente**).
 
 ## Despliegue en Vercel
 
@@ -81,7 +78,6 @@ Sin estas variables el build de Vite **no incluye** la conexión a Supabase y la
 |----------|---------|
 | `VITE_SUPABASE_URL` | `https://xxx.supabase.co` |
 | `VITE_SUPABASE_ANON_KEY` | `eyJ...` (anon key del proyecto) |
-| `VITE_GOOGLE_MAPS_API_KEY` | Misma clave que la app Fuerza de Ventas (opcional pero recomendada) |
 
 Marca **Production**, **Preview** y **Development**. Después de guardar, haz **Redeploy** (no basta con guardar las variables).
 

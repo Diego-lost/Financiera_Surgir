@@ -111,17 +111,6 @@ button { font-family: inherit; cursor: pointer; }
 .hb-field label {
   display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #374151;
 }
-.hb-suggest-list {
-  position: absolute; z-index: 20; left: 0; right: 0; top: 100%; margin: 4px 0 0;
-  padding: 0; list-style: none; background: #fff; border: 1px solid var(--hb-border);
-  border-radius: 9px; box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12); max-height: 220px;
-  overflow-y: auto;
-}
-.hb-suggest-list li button {
-  display: block; width: 100%; text-align: left; padding: 10px 12px; border: none;
-  background: transparent; font: inherit; font-size: 13px; cursor: pointer;
-}
-.hb-suggest-list li button:hover { background: #f3f4f6; }
 .hb-input, .hb-select, .hb-textarea {
   width: 100%; padding: 11px 13px; border: 1px solid var(--hb-border); border-radius: 9px;
   font-size: 14px; font-family: inherit; background: #fff;
@@ -465,13 +454,3 @@ button { font-family: inherit; cursor: pointer; }
 .cm-chip.sel { border-color: var(--hb-red); background: var(--hb-red-light); color: var(--hb-red-dark); }
 
 .cm-section-title { font-size: 16px; font-weight: 700; margin: 24px 0 12px; color: #374151; }
-
-/* Mapa ruta del día */
-.route-map-card { padding: 0; overflow: hidden; margin-bottom: 14px; }
-.route-map-card-head {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  padding: 14px 16px; border-bottom: 1px solid var(--hb-border);
-}
-.route-map-card-head strong { font-size: 15px; }
-.route-map-card-head span { font-size: 13px; color: var(--hb-muted); flex: 1; }
-.route-day-map { width: 100%; height: 380px; min-height: 280px; background: #eef0f3; }
