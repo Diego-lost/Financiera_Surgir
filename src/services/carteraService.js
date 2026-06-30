@@ -17,7 +17,8 @@ function mapParada(p, idx) {
     prioridad: prioridad >= 80 ? 'alta' : prioridad >= 60 ? 'media' : 'normal',
     score_prioridad: prioridad,
     monto_credito: p.solicitud_monto || 0,
-    estado_visita: 'pendiente',
+    saldo_cuenta: Number(p.saldo_cuenta) || 0,
+    estado_visita: p.estado_visita || 'pendiente',
     lat: p.lat_negocio,
     lng: p.lng_negocio,
     telefono: p.telefono,
@@ -40,32 +41,24 @@ export async function listarCartera() {
   return paradas.map(mapParada)
 }
 
-/** Registra resultado de visita en la ficha de campo del cliente. */
+/** Registra visita del día — desaparece de la cartera al recargar. */
 export async function marcarVisita(carteraId, { resultado, observacion }) {
-  const userId = carteraId
-  const nota = observacion
-    ? `[${resultado}] ${observacion}`
-    : `Visita: ${resultado}`
+  const { data: raw, error } = await supabase.rpc('asesor_registrar_visita_cartera', {
+    p_cliente_user_id: carteraId,
+    p_resultado: resultado,
+    p_observacion: observacion || '',
+  })
 
-  const { data: ficha } = await supabase
-    .from('fichas_campo')
-    .select('id')
-    .eq('user_id', userId)
-    .order('fecha_visita', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  if (ficha?.id) {
-    const { error } = await supabase
-      .from('fichas_campo')
-      .update({
-        recomendacion_asesor: nota,
-        estado_ficha: resultado === 'visitado' ? 'completada' : 'en_proceso',
-      })
-      .eq('id', ficha.id)
-
-    if (error) throw new Error(supabaseError(error, 'No se pudo registrar la visita.'))
+  if (error) {
+    const msg = error.message || ''
+    if (msg.includes('asesor_registrar_visita_cartera')) {
+      throw new Error(
+        'Ejecuta database/supabase/33_cartera_visitas_dia.sql en Supabase para registrar visitas.',
+      )
+    }
+    throw new Error(supabaseError(error, 'No se pudo registrar la visita.'))
   }
 
-  return { ok: true, estado_visita: resultado }
+  if (!raw?.ok) throw new Error(raw?.error || 'No se pudo registrar la visita.')
+  return raw
 }

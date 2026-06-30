@@ -52,8 +52,8 @@ export default function CarteraPage() {
     setError(null)
     try {
       await marcarVisita(target.id, { resultado, observacion })
-      setItems((prev) => prev.map((i) => (i.id === target.id ? { ...i, estado_visita: resultado } : i)))
-      setOk(`Visita de ${target.cliente_nombre} registrada como "${humanizar(resultado)}".`)
+      setItems((prev) => prev.filter((i) => i.id !== target.id))
+      setOk(`Visita de ${target.cliente_nombre} registrada. Ya no aparece en la cartera de hoy.`)
       setTarget(null)
     } catch (err) {
       setError(extractError(err))
@@ -83,7 +83,9 @@ export default function CarteraPage() {
       {loading ? (
         <Loader text="Cargando tu cartera…" />
       ) : items.length === 0 ? (
-        <div className="hb-card hb-table-empty">No tienes clientes asignados para hoy.</div>
+        <div className="hb-card hb-table-empty">
+          No hay clientes pendientes en tu cartera de hoy.
+        </div>
       ) : (
         <div className="cm-list">
           {items.map((it) => {
@@ -108,9 +110,15 @@ export default function CarteraPage() {
                     ? <Badge estado={it.estado_visita} />
                     : <Badge estado="pendiente" tone="amber" label="Pendiente" />}
                   <div className="cm-item-monto">
-                    <Money value={it.monto_credito} />
-                    <small>crédito</small>
+                    <Money value={it.saldo_cuenta} />
+                    <small>saldo cuenta</small>
                   </div>
+                  {it.monto_credito > 0 && (
+                    <div className="cm-item-monto" style={{ marginTop: 4 }}>
+                      <Money value={it.monto_credito} />
+                      <small>solicitud</small>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button
                       className="hb-btn hb-btn-ghost hb-btn-sm"
